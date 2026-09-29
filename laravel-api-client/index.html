@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Posts client</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="progress" class="progress" hidden></div>
+
+  <header class="topbar">
+    <h1>Posts</h1>
+    <div id="session" class="session" hidden>
+      <span id="session-name"></span>
+      <button id="logout-btn" type="button" class="btn">Log out</button>
+    </div>
+  </header>
+
+  <p id="notice" class="notice" hidden></p>
+
+  <main class="layout">
+    <aside class="side">
+
+      <!-- Logged out -->
+      <section id="auth-panel" class="panel">
+        <div class="tabs">
+          <button type="button" id="tab-login" class="tab is-active">Log in</button>
+          <button type="button" id="tab-register" class="tab">Register</button>
+        </div>
+
+        <form id="login-form" class="form">
+          <label>Email <input type="email" name="email" required></label>
+          <label>Password <input type="password" name="password" required></label>
+          <button type="submit" class="btn primary">Log in</button>
+        </form>
+
+        <form id="register-form" class="form" hidden>
+          <label>Name <input type="text" name="name" required maxlength="255"></label>
+          <label>Email <input type="email" name="email" required></label>
+          <label>Password <input type="password" name="password" required></label>
+          <label>Repeat password <input type="password" name="password_confirmation" required></label>
+          <button type="submit" class="btn primary">Create account</button>
+        </form>
+      </section>
+
+      <!-- Logged in -->
+      <section id="new-post-panel" class="panel" hidden>
+        <h2>New post</h2>
+        <form id="post-form" class="form">
+          <label>Title <input type="text" name="title" required maxlength="255"></label>
+          <label>Body <textarea name="body" rows="5" required></textarea></label>
+          <button type="submit" class="btn primary">Publish post</button>
+        </form>
+      </section>
+
+      <!-- kanye.rest: same task, two methods -->
+      <section class="panel">
+        <h2>Random quote</h2>
+        <blockquote id="quote-text" class="quote"></blockquote>
+        <div class="row">
+          <button id="quote-btn" type="button" class="btn">New quote (fetch)</button>
+          <button id="quote-xhr-btn" type="button" class="btn">New quote (XHR)</button>
+        </div>
+      </section>
+
+      <!-- catfact.ninja: query parameter -->
+      <section class="panel">
+        <h2>Cat fact</h2>
+        <form id="cat-form" class="form">
+          <label>Max length (characters)
+            <input type="number" name="max_length" min="1" max="500" placeholder="any length">
+          </label>
+          <button type="submit" class="btn">Get a cat fact</button>
+        </form>
+        <blockquote id="cat-text" class="quote"></blockquote>
+      </section>
+
+    </aside>
+
+    <section class="feed">
+      <div class="feed-head">
+        <h2>All posts</h2>
+        <button id="refresh-btn" type="button" class="btn">Refresh</button>
+      </div>
+      <div id="posts"></div>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
