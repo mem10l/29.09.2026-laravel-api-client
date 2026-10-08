@@ -4,53 +4,41 @@ import { useApp } from '../AppContext.jsx';
 import Comments from './Comments.jsx';
 
 export default function PostCard({ post, onUpdated, onDeleted }) {
-  const { user, notify } = useApp();
+  const { user, notify, guard } = useApp();
   const mine = Boolean(user) && post.user_id === user.id;
   const statusName = STATUS[post.post_status_id] || 'public';
 
   const [editing, setEditing] = useState(false);
   const [showComments, setShowComments] = useState(false);
 
-  async function onSaveEdit(event) {
+  const onSaveEdit = guard(async (event) => {
     event.preventDefault();
     const form = new FormData(event.target);
-    try {
-      const updated = await api(`/posts/${post.id}`, {
-        method: 'PUT',
-        body: { title: form.get('title'), body: form.get('body') },
-      });
-      onUpdated(updated);
-      setEditing(false);
-      notify('Post updated.');
-    } catch (error) {
-      notify(error.message, true);
-    }
-  }
+    const updated = await api(`/posts/${post.id}`, {
+      method: 'PUT',
+      body: { title: form.get('title'), body: form.get('body') },
+    });
+    onUpdated(updated);
+    setEditing(false);
+    notify('Post updated.');
+  });
 
-  async function onToggleStatus() {
+  const onToggleStatus = guard(async () => {
     const nextStatusId = post.post_status_id === 1 ? 2 : 1;
-    try {
-      const updated = await api(`/posts/${post.id}/status`, {
-        method: 'PATCH',
-        body: { post_status_id: nextStatusId },
-      });
-      onUpdated(updated);
-      notify(`Post is now ${STATUS[nextStatusId]}.`);
-    } catch (error) {
-      notify(error.message, true);
-    }
-  }
+    const updated = await api(`/posts/${post.id}/status`, {
+      method: 'PATCH',
+      body: { post_status_id: nextStatusId },
+    });
+    onUpdated(updated);
+    notify(`Post is now ${STATUS[nextStatusId]}.`);
+  });
 
-  async function onDelete() {
+  const onDelete = guard(async () => {
     if (!confirm(`Delete "${post.title}"?`)) return;
-    try {
-      await api(`/posts/${post.id}`, { method: 'DELETE' });
-      onDeleted(post.id);
-      notify('Post deleted.');
-    } catch (error) {
-      notify(error.message, true);
-    }
-  }
+    await api(`/posts/${post.id}`, { method: 'DELETE' });
+    onDeleted(post.id);
+    notify('Post deleted.');
+  });
 
   return (
     <article className="post">

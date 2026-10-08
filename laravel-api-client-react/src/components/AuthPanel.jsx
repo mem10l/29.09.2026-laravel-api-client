@@ -3,50 +3,42 @@ import { api, errorText } from '../api.js';
 import { useApp } from '../AppContext.jsx';
 
 export default function AuthPanel({ onAuthed }) {
-  const { login, notify } = useApp();
+  const { login, notify, guard } = useApp();
   const [tab, setTab] = useState('login'); // 'login' | 'register'
 
-  async function onLogin(event) {
+  const onLogin = guard(async (event) => {
     event.preventDefault();
     const form = new FormData(event.target);
-    try {
-      const data = await api('/login', {
-        method: 'POST',
-        body: { email: form.get('email'), password: form.get('password') },
-      });
-      // The API answers 200 with {errors: ...} and no token when the password is wrong.
-      if (!data.token) throw new Error(errorText(200, data));
+    const data = await api('/login', {
+      method: 'POST',
+      body: { email: form.get('email'), password: form.get('password') },
+    });
+    // The API answers 200 with {errors: ...} and no token when the password is wrong.
+    if (!data.token) throw new Error(errorText(200, data));
 
-      login(data);
-      event.target.reset();
-      onAuthed();
-      notify(`Welcome back, ${data.user.name}.`);
-    } catch (error) {
-      notify(error.message, true);
-    }
-  }
+    login(data);
+    event.target.reset();
+    onAuthed();
+    notify(`Welcome back, ${data.user.name}.`);
+  });
 
-  async function onRegister(event) {
+  const onRegister = guard(async (event) => {
     event.preventDefault();
     const form = new FormData(event.target);
-    try {
-      const data = await api('/register', {
-        method: 'POST',
-        body: {
-          name: form.get('name'),
-          email: form.get('email'),
-          password: form.get('password'),
-          password_confirmation: form.get('password_confirmation'),
-        },
-      });
-      login(data);
-      event.target.reset();
-      onAuthed();
-      notify(`Account created. You are logged in as ${data.user.name}.`);
-    } catch (error) {
-      notify(error.message, true);
-    }
-  }
+    const data = await api('/register', {
+      method: 'POST',
+      body: {
+        name: form.get('name'),
+        email: form.get('email'),
+        password: form.get('password'),
+        password_confirmation: form.get('password_confirmation'),
+      },
+    });
+    login(data);
+    event.target.reset();
+    onAuthed();
+    notify(`Account created. You are logged in as ${data.user.name}.`);
+  });
 
   return (
     <section className="panel">

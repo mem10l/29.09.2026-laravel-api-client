@@ -33,7 +33,18 @@ export function AppProvider({ children }) {
     setUser(null);
   }, []);
 
-  const value = { user, login, logout, notify, notice };
+  // Wraps an async event handler so any error it throws (an api() call
+  // rejecting, for instance) is shown via notify() instead of needing a
+  // try/catch in every component. Mirrors the old vanilla-JS guard().
+  const guard = useCallback((handler) => async (...args) => {
+    try {
+      await handler(...args);
+    } catch (error) {
+      notify(error.message, true);
+    }
+  }, [notify]);
+
+  const value = { user, login, logout, notify, notice, guard };
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 }
 

@@ -14,12 +14,12 @@
    or data-theme="light") stays the light palette above. */
 :root[data-theme="dark"] {
   --bg: #121212;
-  --ink: #949494;
+  --ink: #ededed;
   --muted: #8f8f8f;
   --line: #2a2a2a;
-  --accent: #949494;
+  --accent: #ededed;
   --accent-ink: #121212;
-  --danger: #97504b;
+  --danger: #e5756c;
   --public: #7fb89c;
   --private: #d1a65f;
 }

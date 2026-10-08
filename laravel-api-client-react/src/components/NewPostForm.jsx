@@ -3,23 +3,19 @@ import { api } from '../api.js';
 import { useApp } from '../AppContext.jsx';
 
 export default function NewPostForm({ onCreated }) {
-  const { notify } = useApp();
+  const { notify, guard } = useApp();
 
-  async function onSubmit(event) {
+  const onSubmit = guard(async (event) => {
     event.preventDefault();
     const form = new FormData(event.target);
-    try {
-      await api('/posts', {
-        method: 'POST',
-        body: { title: form.get('title'), body: form.get('body') },
-      });
-      event.target.reset();
-      onCreated();
-      notify('Post published.');
-    } catch (error) {
-      notify(error.message, true);
-    }
-  }
+    await api('/posts', {
+      method: 'POST',
+      body: { title: form.get('title'), body: form.get('body') },
+    });
+    event.target.reset();
+    onCreated();
+    notify('Post published.');
+  });
 
   return (
     <section className="panel">

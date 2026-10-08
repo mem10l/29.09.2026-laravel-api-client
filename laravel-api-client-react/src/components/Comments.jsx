@@ -3,7 +3,7 @@ import { api } from '../api.js';
 import { useApp } from '../AppContext.jsx';
 
 export default function Comments({ postId }) {
-  const { user, notify } = useApp();
+  const { user, notify, guard } = useApp();
   const [comments, setComments] = useState(null); // null = not loaded yet
   const [text, setText] = useState('');
 
@@ -16,27 +16,19 @@ export default function Comments({ postId }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [postId]);
 
-  async function onSubmit(event) {
+  const onSubmit = guard(async (event) => {
     event.preventDefault();
     if (!text.trim()) return;
-    try {
-      const comment = await api(`/posts/${postId}/comments`, { method: 'POST', body: { content: text } });
-      setComments((prev) => [...(prev || []), comment]);
-      setText('');
-    } catch (error) {
-      notify(error.message, true);
-    }
-  }
+    const comment = await api(`/posts/${postId}/comments`, { method: 'POST', body: { content: text } });
+    setComments((prev) => [...(prev || []), comment]);
+    setText('');
+  });
 
-  async function onDelete(commentId) {
-    try {
-      await api(`/posts/${postId}/comments/${commentId}`, { method: 'DELETE' });
-      setComments((prev) => prev.filter((c) => c.id !== commentId));
-      notify('Comment deleted.');
-    } catch (error) {
-      notify(error.message, true);
-    }
-  }
+  const onDelete = guard(async (commentId) => {
+    await api(`/posts/${postId}/comments/${commentId}`, { method: 'DELETE' });
+    setComments((prev) => prev.filter((c) => c.id !== commentId));
+    notify('Comment deleted.');
+  });
 
   if (comments === null) return <div className="comments">Loading…</div>;
 
