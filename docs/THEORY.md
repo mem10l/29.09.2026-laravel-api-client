@@ -9,7 +9,7 @@ the DOM content.
 
 **This project (React + Vite) works exactly this way.** Viewing "View Page
 Source" (not DevTools Elements) shows a practically empty `<div id="root"></div>`
-— all content only appears after the browser executes `main.jsx`.
+— all content only appears after the browser executes `main.tsx`.
 
 Pros:
 - Simpler architecture — the server doesn't need to know about components
@@ -99,11 +99,11 @@ change in the DOM.
 ## React components
 
 A component is a regular JavaScript function that returns JSX (HTML-like
-syntax) and can be reused. Each `.jsx` file in this project exports one
+syntax) and can be reused. Each `.tsx` file in this project exports one
 component:
 
 ```jsx
-// src/components/NewPostForm.jsx
+// src/components/NewPostForm.tsx
 export default function NewPostForm({ onCreated }) {
   // ...
   return (
@@ -119,12 +119,12 @@ export default function NewPostForm({ onCreated }) {
 
 Important principles visible in this code:
 - **Components receive "props"** (parameters) — e.g. `NewPostForm` receives
-  an `onCreated` function from its parent (`App.jsx`) to report that a new
+  an `onCreated` function from its parent (`App.tsx`) to report that a new
   post was created.
-- **Components can contain other components** — `App.jsx` combines
+- **Components can contain other components** — `App.tsx` combines
   `TopBar`, `AuthPanel`, `PostFeed`, `CatFactWidget`, etc. on one page.
 - **Single-responsibility principle** — each component does one thing:
-  `Comments.jsx` only shows and manages comments, `PostCard.jsx` handles one
+  `Comments.tsx` only shows and manages comments, `PostCard.tsx` handles one
   post.
 
 ## The `useState` hook
@@ -132,7 +132,7 @@ Important principles visible in this code:
 `useState` is a function that lets a component **"remember" data between
 renders** and automatically re-render when that data changes.
 
-Example from `CatFactWidget.jsx`:
+Example from `CatFactWidget.tsx`:
 
 ```jsx
 const [fact, setFact] = useState('Loading…');
@@ -162,7 +162,7 @@ version, where the code did `box.textContent = data.fact` directly.
 timers, subscriptions — that aren't directly part of rendering, but need to
 run after the component has been shown on screen.
 
-Example from `Comments.jsx`:
+Example from `Comments.tsx`:
 
 ```jsx
 useEffect(() => {
@@ -185,7 +185,7 @@ Here:
   request finishes, this prevents calling `setState` on an already
   "dead" component
 
-A simpler example from `TextApiWidget.jsx`:
+A simpler example from `TextApiWidget.tsx`:
 
 ```jsx
 useEffect(() => { load(); }, [load]);
@@ -207,11 +207,11 @@ version's `init()` function, which ran once at page start.
 
 1. **Declarative style** — you describe *how the UI looks given the data*,
    not *step by step how to change it*. Compare the old `postCard()`
-   function (which manually built DOM elements) with the new `PostCard.jsx`,
+   function (which manually built DOM elements) with the new `PostCard.tsx`,
    which simply returns JSX based on the `post` and `editing` state.
 
-2. **Reusable components** — `TextApiWidget.jsx` is one component used
-   three times by `App.jsx` with different parameters (quote, joke, fact),
+2. **Reusable components** — `TextApiWidget.tsx` is one component used
+   three times by `App.tsx` with different parameters (quote, joke, fact),
    instead of three nearly identical functions, as it would be in the
    vanilla-JS version.
 
@@ -222,7 +222,7 @@ version's `init()` function, which ran once at page start.
 4. **Large community and ecosystem** — many libraries, tools, and
    documentation; solutions are easy to find.
 
-5. **Structured state management** — `AppContext.jsx` shows how data (the
+5. **Structured state management** — `AppContext.tsx` shows how data (the
    logged-in user, the notice banner) can be shared between components
    without manual DOM lookups (`document.querySelector`).
 
