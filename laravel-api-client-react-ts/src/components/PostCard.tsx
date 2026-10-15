@@ -1,0 +1,88 @@
+import { useState, type FormEvent } from 'react';
+import { api, STATUS, formatDate } from '../api';
+import { useApp } from '../AppContext';
+import Comments from './Comments';
+import type { Post } from '../types';
+
+interface Props {
+  post: Post;
+  onUpdated: (post: Post) => void;
+  onDeleted: (id: number) => void;
+}
+
+export default function PostCard({ post, onUpdated, onDeleted }: Props) {
+  const { user, notify, guard } = useApp();
+  const mine = Boolean(user) && post.user_id === user?.id;
+  const statusName = STATUS[post.post_status_id] || 'public';
+
+  const [editing, setEditing] = useState(false);
+  const [showComments, setShowComments] = useState(false);
+
+  const onSaveEdit = guard(async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const form = new FormData(event.currentTarget);
+    const updated = await api<Post>(`/posts/${post.id}`, {
+      method: 'PUT',
+      body: { title: form.get('title'), body: form.get('body') },
+    });
+    onUpdated(updated);
+    setEditing(false);
+    notify('Post updated.');
+  });
+
+  const onToggleStatus = guard(async () => {
+    const nextStatusId = post.post_status_id === 1 ? 2 : 1;
+    const updated = await api<Post>(`/posts/${post.id}/status`, {
+      method: 'PATCH',
+      body: { post_status_id: nextStatusId },
+    });
+    onUpdated(updated);
+    notify(`Post is now ${STATUS[nextStatusId]}.`);
+  });
+
+  const onDelete = guard(async () => {
+    if (!confirm(`Delete "${post.title}"?`)) return;
+    await api(`/posts/${post.id}`, { method: 'DELETE' });
+    onDeleted(post.id);
+    notify('Post deleted.');
+  });
+
+  return (
+    <article className="post">
+      {editing ? (
+        <form className="form edit-form" onSubmit={onSaveEdit}>
+          <input name="title" defaultValue={post.title} required maxLength={255} aria-label="Title" />
+          <textarea name="body" rows={4} defaultValue={post.body} required aria-label="Body" />
+          <div className="row">
+            <button type="submit" className="btn primary">Save changes</button>
+            <button type="button" className="btn" onClick={() => setEditing(false)}>Cancel</button>
+          </div>
+        </form>
+      ) : (
+        <div className="post-view">
+          <div className="post-head">
+            <h3>{post.title}</h3>
+            <span className={`badge ${statusName}`}>{statusName}</span>
+          </div>
+          <p className="post-body">{post.body}</p>
+          <p className="meta">{mine ? 'You' : `User #${post.user_id}`}, {formatDate(post.created_at)}</p>
+        </div>
+      )}
+
+      <div className="row actions">
+        <button type="button" className="btn" onClick={() => setShowComments((v) => !v)}>Comments</button>
+        {mine && !editing && (
+          <>
+            <button type="button" className="btn" onClick={() => setEditing(true)}>Edit</button>
+            <button type="button" className="btn" onClick={onToggleStatus}>
+              {post.post_status_id === 1 ? 'Make private' : 'Make public'}
+            </button>
+            <button type="button" className="btn danger" onClick={onDelete}>Delete</button>
+          </>
+        )}
+      </div>
+
+      {showComments && <Comments postId={post.id} />}
+    </article>
+  );
+}
