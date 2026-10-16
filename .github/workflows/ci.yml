@@ -1,0 +1,110 @@
+name: CI
+
+# Runs after every `git push` to the main branch (the course requirement).
+# Pull requests into main and a manual "Run workflow" button are extras that
+# make it easier to check a change before it lands on main.
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+# If you push twice in a row, cancel the older run instead of queueing it.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+# The workflow only needs to read the repository's code.
+permissions:
+  contents: read
+
+env:
+  NODE_VERSION: 20
+
+# The repository root is /project, and the app lives in the `laravel-api-client-react-ts`
+# subfolder. GitHub only reads workflows from the root `.github/`, so every
+# `run:` step is pointed at the app folder here.
+defaults:
+  run:
+    working-directory: laravel-api-client-react-ts
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out the code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: laravel-api-client-react-ts/package-lock.json
+
+      # `npm ci` installs exactly what package-lock.json says (and fails if
+      # the lock file is out of date), so CI matches your machine.
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run ESLint
+        run: npm run lint
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out the code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: laravel-api-client-react-ts/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Vitest + React Testing Library; `vitest run` runs once and exits
+      # (plain `vitest` would sit in watch mode forever).
+      - name: Run unit and component tests
+        run: npm run test:run
+
+  build:
+    name: Type-check and build
+    # Only worth building if the code is lint-clean and its tests pass.
+    needs: [lint, test]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out the code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: laravel-api-client-react-ts/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      # "build" is `tsc -b && vite build`: the TypeScript type check runs
+      # first, so a type error fails this step before Vite even starts.
+      - name: Type-check and build
+        run: npm run build
+
+      - name: Upload the production build
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: laravel-api-client-react-ts/dist/
+          retention-days: 7
+          if-no-files-found: error

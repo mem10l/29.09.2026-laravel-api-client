@@ -13,6 +13,10 @@ export default function AuthPanel({ onAuthed }: Props) {
 
   const onLogin = guard(async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    // Save the element before the first `await` — event.currentTarget is
+    // reset to null once the browser finishes dispatching the event, which
+    // happens while we're awaiting api(), so reading it again afterward
+    // throws "can't access property 'reset', event.currentTarget is null".
     const formEl = event.currentTarget;
     const form = new FormData(formEl);
     const data = await api<AuthResponse>('/login', {
@@ -30,7 +34,7 @@ export default function AuthPanel({ onAuthed }: Props) {
 
   const onRegister = guard(async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const formEl = event.currentTarget;
+    const formEl = event.currentTarget; // see note in onLogin above
     const form = new FormData(formEl);
     const data = await api<AuthResponse>('/register', {
       method: 'POST',

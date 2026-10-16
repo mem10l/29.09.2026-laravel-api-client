@@ -25,6 +25,8 @@ npm run dev        # opens http://localhost:5500
 - `npm run build` — type-checks (`tsc -b`) then builds to `dist/`. The
   build **fails** if there's a type error, by design.
 - `npm run typecheck` — just the type check, no build, useful while editing.
+- `npm run lint` — ESLint (TypeScript + React Hooks rules).
+- `npm test` — Vitest in watch mode; `npm run test:run` runs once and exits.
 - `npm run preview` — serves the built `dist/` folder.
 
 ## Project layout
@@ -51,7 +53,18 @@ src/
     TextApiWidget.tsx          reusable box for quote / joke / useless-fact
     CatFactWidget.tsx          cat-fact box with the max_length parameter field
   style.css                 identical to the JS version — unaffected by TS
+  *.test.ts(x)               tests, next to the code they cover
+  test/                      shared test helpers (mockFetch, renderWithApp)
+eslint.config.js             ESLint flat config
+.github/workflows/ci.yml     CI: lint, test, build on every push to main
 ```
+
+## Tests and CI
+
+`npm run test:run` runs 59 tests (Vitest + React Testing Library). On every
+`git push` to `main`, GitHub Actions runs lint, the tests and the build — see
+[`docs/CI.md`](docs/CI.md) for the pipeline, how to watch a run in the
+**Actions** tab, and what each test file covers.
 
 ## Docs
 

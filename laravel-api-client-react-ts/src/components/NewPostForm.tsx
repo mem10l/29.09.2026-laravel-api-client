@@ -11,6 +11,9 @@ export default function NewPostForm({ onCreated }: Props) {
 
   const onSubmit = guard(async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    // Save the element before the first `await` — see the note in
+    // AuthPanel.tsx; event.currentTarget would be null by the time we try
+    // to call .reset() on it below, after api() resolves.
     const formEl = event.currentTarget;
     const form = new FormData(formEl);
     await api('/posts', {

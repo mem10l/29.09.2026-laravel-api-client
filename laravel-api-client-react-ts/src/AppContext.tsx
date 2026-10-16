@@ -62,7 +62,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
     } catch (error) {
       notify(error instanceof Error ? error.message : String(error), true);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [notify]);
 
   const value: AppContextValue = { user, login, logout, notify, notice, guard };

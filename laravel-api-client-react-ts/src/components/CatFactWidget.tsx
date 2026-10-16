@@ -32,7 +32,7 @@ export default function CatFactWidget() {
     }
   }
 
-  useEffect(() => { load(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { load(); }, []);
 
   return (
     <section className="panel">
